@@ -174,6 +174,20 @@ impl TryFrom<u8> for RootFsStatus {
     }
 }
 
+impl TryFrom<&str> for RootFsStatus {
+    type Error = &'static str;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value.to_lowercase().as_str() {
+            "normal" | "0" => Ok(RootFsStatus::Normal),
+            "updateinprocess" | "updinprocess" | "1" => Ok(RootFsStatus::UpdateInProcess),
+            "updatedone" | "upddone" | "2" => Ok(RootFsStatus::UpdateDone),
+            "unbootable" | "3" => Ok(RootFsStatus::Unbootable),
+            _ => Err("Invalid status provided"),
+        }
+    }
+}
+
 /// Get the current active slot.
 pub fn get_current_slot() -> Result<Slot, Error> {
     match efivar::bootchain::get_current_boot_slot()? {

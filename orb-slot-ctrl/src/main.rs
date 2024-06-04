@@ -117,35 +117,12 @@ fn main() -> eyre::Result<()> {
                     }
                 }
                 StatusCommands::SetRootfsStatus { status } => {
-                    let status = match status.as_str() {
-                        // Status Normal alias.
-                        "Normal" => orb_slot_ctrl::RootFsStatus::Normal,
-                        "normal" => orb_slot_ctrl::RootFsStatus::Normal,
-                        "0" => orb_slot_ctrl::RootFsStatus::Normal,
-                        // Status UpdateInProcess alias.
-                        "UpdateInProcess" => {
-                            orb_slot_ctrl::RootFsStatus::UpdateInProcess
-                        }
-                        "updateinprocess" => {
-                            orb_slot_ctrl::RootFsStatus::UpdateInProcess
-                        }
-                        "updinprocess" => orb_slot_ctrl::RootFsStatus::UpdateInProcess,
-                        "1" => orb_slot_ctrl::RootFsStatus::UpdateInProcess,
-                        // Status UpdateDone alias.
-                        "UpdateDone" => orb_slot_ctrl::RootFsStatus::UpdateDone,
-                        "updatedone" => orb_slot_ctrl::RootFsStatus::UpdateDone,
-                        "upddone" => orb_slot_ctrl::RootFsStatus::UpdateDone,
-                        "2" => orb_slot_ctrl::RootFsStatus::UpdateDone,
-                        // Status Unbootable alias.
-                        "Unbootable" => orb_slot_ctrl::RootFsStatus::Unbootable,
-                        "unbootable" => orb_slot_ctrl::RootFsStatus::Unbootable,
-                        "3" => orb_slot_ctrl::RootFsStatus::Unbootable,
-                        _ => {
-                            println!("Invalid status provided. For a full list of available rootfs status run:");
-                            println!("slot-ctrl status --list");
-                            exit(1)
-                        }
-                    };
+                    let status = status.as_str().try_into().unwrap_or_else(|message| {
+                        println!("{}", message);
+                        println!("For a full list of available rootfs status run:");
+                        println!("slot-ctrl status --list");
+                        exit(1);
+                    });
                     if inactive {
                         if let Err(e) = orb_slot_ctrl::set_rootfs_status(
                             status,
